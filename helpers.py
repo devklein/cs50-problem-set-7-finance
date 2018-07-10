@@ -51,7 +51,7 @@ def lookup(symbol):
     try:
 
         # GET CSV
-        url = f"https://www.alphavantage.co/query?apikey={os.getenv('API_KEY')}&datatype=csv&function=TIME_SERIES_INTRADAY&interval=1min&symbol={symbol}"
+        url = f"https://www.alphavantage.co/query?apikey={os.getenv('API_KEY')}&datatype=csv&function=TIME_SERIES_DAILY&interval=1min&symbol={symbol}"
         webpage = urllib.request.urlopen(url)
 
         # Parse CSV

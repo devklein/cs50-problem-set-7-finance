@@ -57,12 +57,13 @@ def index():
         if stock.get("Shares") == 0:
             continue
         quote = lookup(stock.get("Symbol"))
-        price = quote.get("price")
-        stock["Price"] = usd(price)
+        price = quote.get("price") 
         total = price * stock.get("Shares")
+        stock["Price"] = usd(price)
         stock["Total"] = usd(total)
-        value += round(total, 2)
         shares.append(stock)
+        value += round(total, 2)
+
     # get current cash amount
     cash = db.execute("SELECT cash FROM users WHERE id=:id", id=session['user_id'])
     balance = cash[0]["cash"]
@@ -120,7 +121,7 @@ def buy():
             flash("Successfully bought!")
             return redirect("/")
         else:
-            return apology("Not enough cash. Please reduce shares!")
+            return apology("Not enough cash. Buy less!")
 
 
 @app.route("/sell", methods=["GET", "POST"])
@@ -148,12 +149,12 @@ def sell():
         if not shares:
             return apology("Missing Share Quantity!", 400)
         elif not shares.isdigit():
-            return apology("Please provide a positive numeric number", 400)
+            return apology("Please enter a positive numeric number", 400)
         elif int(shares) < 1:
-            return apology("Please provide a positive number", 400)
+            return apology("Please enter a positive number", 400)
         # check if user has enough shares to sell
         elif int(shares) > share_stock:
-            return apology("You don't have enough shares in your portfolio", 400)
+            return apology("Not enough shares in your portfolio", 400)
         else:
             cash = db.execute("SELECT cash FROM users WHERE id = :id", id=session['user_id'])
             balance = cash[0]["cash"]
@@ -242,7 +243,7 @@ def quote():
         quote = lookup(request.form.get("symbol"))
 
         if quote == None:
-            return apology("Please choose valid symbol", 400)
+            return apology("Please enter valid symbol", 400)
         else:
             symbol = quote.get("symbol")
             price = quote.get("price")
@@ -262,13 +263,9 @@ def register():
         elif not request.form.get("password"):
             return apology("Missing password!", 400)
 
-         # Ensure password confirmation was submitted
-        elif not request.form.get("confirmation"):
-            return apology("Missing password confirmation!", 400)
-
         # Ensure password equals condirmation password submitted
         elif request.form.get("password") != request.form.get("confirmation"):
-            return apology("Password confirmation was wrong!", 400)
+            return apology("Passwords don't match!", 400)
         else:
             # Ensure username doesn't exist already in database
             if len(db.execute("SELECT * FROM users WHERE username = :username", username=request.form.get("username"))) == 0:
@@ -299,13 +296,9 @@ def change_pw():
         if not request.form.get("password"):
             return apology("Missing password!", 400)
 
-         # Ensure password confirmation was submitted
-        elif not request.form.get("confirmation"):
-            return apology("Missing password confirmation!", 400)
-
         # Ensure password equals condirmation password submitted
         elif request.form.get("password") != request.form.get("confirmation"):
-            return apology("Password confirmation wrong!", 400)
+            return apology("Passwords don't match!", 400)
         else:
             # hash the password
             pwdhash = generate_password_hash(request.form.get("password"))
