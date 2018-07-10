@@ -116,6 +116,8 @@ def buy():
                        symbol=symbol, quantity=qty, quote=price, total=total, timestamp=timestamp, u_id=session["user_id"])
             # update balance in database
             db.execute("UPDATE users SET cash=:cash WHERE id=:id", cash=round(new_balance, 2), id=session["user_id"])
+             # flash a success message
+            flash("Successfully bought!")
             return redirect("/")
         else:
             return apology("Not enough cash. Please reduce shares!")
@@ -136,7 +138,6 @@ def sell():
         return render_template("sell.html", symbols=symbols)
 
     if request.method == "POST":
-
         shares = request.form.get("shares")
         symbol_sale = request.form.get("symbol")
         # get quantity of stock to sell
@@ -167,6 +168,8 @@ def sell():
             db.execute("INSERT INTO transactions (symbol, quantity, quote, total, timestamp, u_id) \
             VALUES(:symbol, :quantity, :quote, :total, :timestamp, :u_id)", symbol=symbol_sale, quantity=-shares_sale,
                      quote=price, total=shares_sale * price, timestamp=timestamp,  u_id=session["user_id"])
+         # flash a success message
+        flash("Successfully sold!")
         return redirect("/")
 
 
@@ -224,6 +227,7 @@ def logout():
     session.clear()
 
     # Redirect user to login form
+    flash("Successfully logged out. Log in again?!")
     return redirect("/login")
 
 
@@ -265,7 +269,6 @@ def register():
         # Ensure password equals condirmation password submitted
         elif request.form.get("password") != request.form.get("confirmation"):
             return apology("Password confirmation was wrong!", 400)
-
         else:
             # Ensure username doesn't exist already in database
             if len(db.execute("SELECT * FROM users WHERE username = :username", username=request.form.get("username"))) == 0:
@@ -276,6 +279,7 @@ def register():
                                  username=request.form.get("username"), hash=pwdhash)
                 session["user_id"] = uid
                 # Redirect user to home page
+                flash("Registered successfully!")
                 return redirect("/")
             else:
                 return apology("Please choose another username!", 400)
@@ -307,6 +311,7 @@ def change_pw():
             pwdhash = generate_password_hash(request.form.get("password"))
             db.execute("UPDATE users SET hash = :hash WHERE id=:id", hash=pwdhash, id=session["user_id"])
             # Redirect user to home page
+            flash("Password changed!")
             return redirect("/")
 
 
